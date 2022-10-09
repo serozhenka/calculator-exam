@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 class Stack:
     """Class representing stack data structure."""
 
@@ -29,3 +32,10 @@ class Queue:
 
     def pop(self):
         return self._arr.pop(0)
+
+    def get_copy(self):
+        """
+        Function to get copy of the self protected arr member
+        to be able to modify or access it without changing the queue state.
+        """
+        return deepcopy(self._arr)
