@@ -2,13 +2,13 @@ import re
 
 from .constants import TokenType
 from .exceptions import ParserException
-from evaluating.constants import STR_FUNC_TO_FUNC_MAP
+from evaluating.constants import STR_FUNC_TO_FUNC_MAP, CUSTOM_FUNC_TO_STR_MAP
 
 
 class Token:
     """Class representing token found on the lexical analysis."""
 
-    def __init__(self, token_type: TokenType.value, value):
+    def __init__(self, token_type, value):
         self.token_type = token_type
         self.value = value
 
@@ -34,6 +34,7 @@ class Tokenizer:
         :return: generator of Tokens
         """
 
+        expression = re.sub('-\s?\\(', '-1*(', expression)  # handle unary minus before parenthesis
         token_regex = '|'.join('(?P<%s>%s)' % (k.value, v) for k, v in self.token_to_regex_map.items())
 
         for match in re.finditer(token_regex, expression):
@@ -43,10 +44,12 @@ class Tokenizer:
             if token_type == TokenType.SPACE.value:  # pass if value is space symbol
                 continue
             elif token_type == TokenType.FUNC.value:
-                if value not in STR_FUNC_TO_FUNC_MAP:
+                if value not in [*STR_FUNC_TO_FUNC_MAP.keys(), *CUSTOM_FUNC_TO_STR_MAP.keys()]:
                     # if function is not present in available functions raise exception
                     raise ParserException(
-                        f"Function {value} at {match.start(token_type)}-{match.end(token_type)} not available"
+                        message=f"Function {value} not available",
+                        start=match.start(token_type),
+                        end=match.end(token_type),
                     )
 
             elif token_type == TokenType.MISMATCH.value:

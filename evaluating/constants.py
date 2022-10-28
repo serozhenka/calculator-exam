@@ -22,3 +22,6 @@ STR_FUNC_TO_FUNC_MAP = {
     'arctg': math.atan,
     'arcctg': lambda v: math.atan(1 / v),
 }
+
+CUSTOM_FUNC_TO_STR_MAP = {}
+# CUSTOM_FUNC_TO_STR_MAP = {'myfunc': 'x ^ 2 + 1'}

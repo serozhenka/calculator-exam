@@ -73,8 +73,10 @@ class Parser:
                         else:
                             # Mismatched parenthesis case
                             raise ParserException(
-                                "Parenthesis mismatch.\n"
-                                "Some of the closing parenthesis doesn't have the opening one."
+                                message=(
+                                    "Parenthesis mismatch\n"
+                                    "Some of the closing parenthesis doesn't have the opening one"
+                                )
                             )
 
                         if getattr(self.operator_stack.top(), 'value', None) == "(":
@@ -93,8 +95,10 @@ class Parser:
                 # then there are mismatched parentheses.
 
                 raise ParserException(
-                    "Parenthesis mismatch.\n"
-                    "Some of the opening parenthesis doesn't have the closing one."
+                    message=(
+                        "Parenthesis mismatch\n"
+                        "Some of the opening parenthesis doesn't have the closing one"
+                    )
                 )
             self.output_queue.push(operator)
 
