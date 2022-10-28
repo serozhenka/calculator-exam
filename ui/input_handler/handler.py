@@ -7,6 +7,7 @@ from ui.constants import OPERATORS
 
 
 class InputHandler:
+    """Class that processes character when user types in a field."""
 
     def __init__(self, field: QTextEdit):
         self.field = field
@@ -28,18 +29,22 @@ class InputHandler:
 
     def handle(self, inp):
         self.cursor_position = 0
-
         text = self.field.toPlainText()
         cursor = self.field.textCursor()
         pos = cursor.position()
         self.field.setFocus()
 
-        if pos == 0:
+        if pos == 0:  # handling input on the start of the string
+            if inp == "-" and self.get_next(text, 0, 1) != "-":
+                self.field.setText("-" + text)
+                cursor.setPosition(1)
+                self.field.setTextCursor(cursor)
+
             if inp in ["."] + OPERATORS:
                 return
 
         match inp:
-            case "⇇":
+            case "⇇":  # removing 1 character before cursor
                 if pos == 0:
                     return
                 self.field.setText(text[0:pos-1] + text[pos:])
@@ -47,24 +52,20 @@ class InputHandler:
                 cursor.setPosition(pos - 1)
                 self.field.setTextCursor(cursor)
 
-            case "←" | "→":
+            case "←" | "→":  # move cursor to the left or right
                 add = 1 if inp == "→" else -1
                 self.cursor_position = 1
                 cursor.setPosition(pos + add)
                 self.field.setTextCursor(cursor)
 
-            case ".":
+            case ".":  # handle decimal point
                 if not self.validator.validate_point(text, pos):
                     return
 
-            case "x":
-                if not self.validator.validate_param(text, pos):
-                    return
-
-            case '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9':
+            case '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9':  # handle number
                 if not self.validator.validate_number(text, pos):
                     return
-            case " ":
+            case " ":  # handle space
                 if not self.validator.validate_space(text, pos):
                     return
 
@@ -72,14 +73,15 @@ class InputHandler:
                     cursor.setPosition(pos + 1)
                     self.field.setTextCursor(cursor)
 
-            case "(" | ")":
-                pass
+            case "(" | ")":  # handle parenthesis
+                if not self.validator.validate_parenthesis(text, inp, pos):
+                    return
 
-            case "+" | "-" | "*" | "/" | "^":
+            case "+" | "-" | "*" | "/" | "^":  # handle operator
                 if not self.validator.validate_operator(text, inp, pos):
                     return
 
-                if inp == "-":
+                if inp == "-":  # specific behaviour for minus operator
                     if self.get_prev(text, pos, 1) == "(":
                         # [(]{insert}
                         self.text = text[:pos] + inp + text[pos:]
@@ -112,11 +114,13 @@ class InputHandler:
                         self.get_prev(text, pos - 1, 1).strip() in OPERATORS
                         and self.get_prev(text, pos, 1).isspace()
                     ):
+                        # 2 [+-/*] {insert}
                         self.text = text[:pos - 2] + inp + text[pos - 1:]
                         self.cursor_position = pos
 
-                if not self.cursor_position:
+                if not self.cursor_position:  # handle other operators
                     if self.get_next(text, pos, 1) in OPERATORS:
+                        # {insert}[+-/*]
                         self.text = text[:pos] + inp + text[pos + 1:]
                         self.cursor_position = pos + 1
 
@@ -124,24 +128,25 @@ class InputHandler:
                         self.get_next(text, pos + 1, 1) in OPERATORS and
                         self.get_next(text, pos, 1).isspace()
                     ):
+                        # {insert} [+-/*]
                         self.text = text[:pos+1] + inp + text[pos + 2:]
                         self.cursor_position = pos + 2
 
-                if self.cursor_position:
+                if self.cursor_position:  # set cursor text and cursor if case was handled
                     self.field.setText(self.text)
                     cursor.setPosition(self.cursor_position)
                     self.field.setTextCursor(cursor)
             case _:
-                if inp in [*STR_FUNC_TO_FUNC_MAP.keys(), *CUSTOM_FUNC_TO_STR_MAP.keys()]:
+                if inp in [*STR_FUNC_TO_FUNC_MAP.keys(), *CUSTOM_FUNC_TO_STR_MAP.keys()]: # handle funcs
                     if not self.validator.validate_function(text, pos):
                         return
 
-                    if self.get_next(text, pos, 2).strip().isdigit():
+                    if self.get_next(text, pos, 2).strip().isdigit():  # handle digit
                         inp += "("
                     else:
                         inp += "()"
 
-                elif inp.isalpha():
+                elif inp.isalpha():  # handle identifier char
                     if not self.validator.validate_identifier(text, pos):
                         return
 

@@ -34,7 +34,7 @@ class Tokenizer:
         :return: generator of Tokens
         """
 
-        expression = re.sub('\\(\s?-\s?\\(', '(-1*(', expression)  # handle unary minus before parenthesis
+        expression = re.sub('-\s?\\(', '-1*(', expression)  # handle unary minus before parenthesis
         token_regex = '|'.join('(?P<%s>%s)' % (k.value, v) for k, v in self.token_to_regex_map.items())
 
         for match in re.finditer(token_regex, expression):

@@ -43,7 +43,7 @@ class Evaluator:
                         result = None
 
                         if function := CUSTOM_FUNC_TO_STR_MAP.get(token.value):
-                            from application.calculator import Calculator
+                            from calculator import Calculator
                             calculator = Calculator()
                             result = calculator.calculate(function.replace('x', str(operand)))
                         elif function := STR_FUNC_TO_FUNC_MAP.get(token.value):
@@ -55,9 +55,12 @@ class Evaluator:
                         result_token = Token(TokenType.NUMBER.value, str(result))
                         self.stack.push(result_token)
 
-            return float(self.stack.pop().value)
+            result = float(self.stack.pop().value)
+            if self.stack.pop():  # if more than one value left raise exception
+                raise
+            return result
 
-        except AttributeError:
+        except Exception:
             raise EvaluatorException(
                 message="Make sure expression is written ok"
             )

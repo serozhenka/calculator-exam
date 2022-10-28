@@ -8,6 +8,7 @@ from .constants import QT_KEY_TO_KEY_TEXT_MAP, LETTERS_KEYS
 
 
 class TextEdit(QTextEdit):
+    """Custom text edit allowing only specific set of keys."""
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         if event.key() not in TEXT_FIELDS_ALLOWED_KEYS + LETTERS_KEYS:
             return
@@ -18,6 +19,7 @@ class TextEdit(QTextEdit):
 
 
 class LettersOnlyTextEdit(QTextEdit):
+    """Custom text edit allowing only letter and cursor moving keys."""
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         if event.key() not in LETTERS_KEYS + [Qt.Key.Key_Backspace, Qt.Key.Key_Left, Qt.Key.Key_Right]:
             return

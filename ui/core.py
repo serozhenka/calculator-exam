@@ -2,7 +2,7 @@ import random
 import re
 
 from functools import partial
-from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtCore import QSize
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QFrame,
@@ -359,6 +359,11 @@ class MainWindow(QMainWindow):
             pass
 
     def preprocess_calculation(self, text):
+        """
+        Function that preprocesses = button click.
+        It looks for undeclared functions and identifiers and proposes to init them.
+        Returns True if preprocessed successfully else False.
+        """
         functions = re.findall(r"[A-Za-z_]{2,}", text)
 
         for function in functions:
@@ -378,6 +383,7 @@ class MainWindow(QMainWindow):
         return True
 
     def button_clicked(self, inp):
+        """Function to handle any button click."""
         input_field = self.create_function_field if self.adding_function else self.input_field
         text = input_field.toPlainText()
         self.save_cursor_position = 0
@@ -386,7 +392,7 @@ class MainWindow(QMainWindow):
         if inp == "f(x)":
             self.additional_functions_click()
 
-        elif inp == "=":
+        elif inp == "=":  # equal sign processing is different from others so put it here
             if (
                 not text or
                 input_field == self.create_function_field or
@@ -411,6 +417,8 @@ class MainWindow(QMainWindow):
             input_handler.handle(inp)
 
         if self.save_cursor_position:
+            # default behaviour is to move cursor to the start of the string,
+            # so have to save cursor position in respect to input
             input_field.setFocus()
             cursor = input_field.textCursor()
             cursor.setPosition(self.save_cursor_position)
